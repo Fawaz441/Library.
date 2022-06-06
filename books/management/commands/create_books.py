@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from books.models import Category
+from books.models import Category, Book, Author
 
 books = [
     {
@@ -4474,5 +4474,17 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for item in books:
             categories = item.get('categories')
+            authors = item.get('authors')
+            if Book.objects.filter(title=item.get('title')).exists():
+                continue
+            book = Book.objects.create(
+                title=item.get('title'),
+                year_published=2022
+            )
             for cat in categories:
                 categ, _ = Category.objects.get_or_create(name=cat)
+                book.categories.add(categ)
+            for author in authors:
+                author_obj, _ = Author.objects.get_or_create(name=author)
+                book.authors.add(author_obj)
+        print('****', Book.objects.count(), '*** books')

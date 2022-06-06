@@ -1,4 +1,5 @@
 from django.contrib.auth import login
+from django.contrib.auth.password_validation import get_default_password_validators
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework.permissions import AllowAny
