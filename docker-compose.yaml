@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  django:
+    build: .
+    container_name: django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      -  .:/usr/src/app/
+    ports:
+      -  "8000:8000"
+    environment:
+      - DEBUG=1
+      - ALLOWED_HOSTS=localhost 127.0.0.1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BACKEND=django-db
+    depends_on:
+      - pdgb
+      - redis
+
+  celery:
+    build:  .
+    command:  celery -A SchoolLib  worker -l info
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - django
+      - redis
+  celery_beat:
+    build: .
+    command: celery -A SchoolLib beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - django
+      - redis
+  pdgb:
+    image: postgres
+    container_name: pgdb
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+  
+volumes:
+  pgdata:
