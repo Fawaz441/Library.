@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +29,6 @@ SECRET_KEY = "django-insecure-(l7^fx&e3i)+$l7vjcj069^%%4153+#p5kys$s^fi$%q#m)tdg
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -82,8 +82,12 @@ WSGI_APPLICATION = 'SchoolLib.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'pdgb',
+        'PORT': 5432,
     }
 }
 
@@ -148,10 +152,21 @@ CELERY_TIMEZONE = "Africa/Lagos"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 # CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+
+CELERY_BEAT_SCHEDULE = {
+    "reject_day_old_pending_requests": {
+        "task": "reject_day_old_pending_requests",
+        "schedule": crontab(minute="*/1"),
+    },
+    "suspend_students": {
+        "task": "suspend_students",
+        "schedule": crontab(minute="*/1"),
+    },
+}

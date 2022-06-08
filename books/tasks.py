@@ -1,3 +1,4 @@
+import os
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.utils import timezone
@@ -8,16 +9,19 @@ logger = get_task_logger(__name__)
 
 @shared_task(name='reject_day_old_pending_requests')
 def clean_old_pending_requests():
-    a_day_ago = timezone.now() - timezone.timedelta(days=1)
+    a_day_ago = timezone.now() - \
+        timezone.timedelta(hours=int(os.getenv(
+            "PENDING_BORROW_REQUEST_EXPIRY", 24)))
     pending_requests = BookBorrowRequest.objects.filter(
         status=PENDING, created__lte=a_day_ago)
     pending_requests.update(status=REJECTED)
     return 'Rejected Day Old Pending Borrow Requests.'
 
 
-@shared_task(name='suspend-students')
+@shared_task(name='suspend_students')
 def suspend_students():
-    three_days_ago = timezone.now() - timezone.timedelta(days=3)
+    three_days_ago = timezone.now(
+    ) - timezone.timedelta(hours=int(os.getenv("DEFAULTING_STUDENTS_EXPIRY", 72)))
     borrow_requests = BookBorrowRequest.objects.filter(
         student__is_active=True,
         status=APPROVED,

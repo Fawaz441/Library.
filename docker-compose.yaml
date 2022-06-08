@@ -13,6 +13,13 @@ services:
       - ALLOWED_HOSTS=localhost 127.0.0.1
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_BACKEND=django-db
+      - DEFAULT_ADMIN_USERNAME=admin
+      - DEFAULT_ADMIN_PASSWORD=admin
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PENDING_BORROW_REQUEST_EXPIRY=24
+      - DEFAULTING_STUDENTS_EXPIRY=72
     depends_on:
       - pdgb
       - redis
@@ -25,6 +32,18 @@ services:
     depends_on:
       - django
       - redis
+    environment:
+      - DEBUG=1
+      - ALLOWED_HOSTS=localhost 127.0.0.1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BACKEND=django-db
+      - DEFAULT_ADMIN_USERNAME=admin
+      - DEFAULT_ADMIN_PASSWORD=admin
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PENDING_BORROW_REQUEST_EXPIRY=24
+      - DEFAULTING_STUDENTS_EXPIRY=72
   celery_beat:
     build: .
     command: celery -A SchoolLib beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
@@ -33,11 +52,23 @@ services:
     depends_on:
       - django
       - redis
+    environment:
+      - DEBUG=1
+      - ALLOWED_HOSTS=localhost 127.0.0.1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BACKEND=django-db
+      - DEFAULT_ADMIN_USERNAME=admin
+      - DEFAULT_ADMIN_PASSWORD=admin
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PENDING_BORROW_REQUEST_EXPIRY=24
+      - DEFAULTING_STUDENTS_EXPIRY=72
   pdgb:
     image: postgres
     container_name: pgdb
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
