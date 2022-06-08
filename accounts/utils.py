@@ -30,15 +30,15 @@ def get_admin_perm():
 
 
 def is_manager(user):
-    return user.has_perm('auth.{0}'.format(MANAGER_CODENAME))
+    return user.has_perm('auth.{0}'.format(MANAGER_CODENAME)) or user.has_perm(MANAGER_CODENAME)
 
 
 def is_admin(user):
-    return user.has_perm('auth.{0}'.format(ADMIN_CODENAME))
+    return user.has_perm('auth.{0}'.format(ADMIN_CODENAME)) or user.has_perm(ADMIN_CODENAME)
 
 
 def is_student(user):
-    return user.has_perm('auth.{0}'.format(STUDENT_CODENAME))
+    return user.has_perm('auth.{0}'.format(STUDENT_CODENAME)) or user.has_perm(STUDENT_CODENAME)
 
 
 def is_strong_password(user, password):

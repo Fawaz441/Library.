@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from utils.response import error_response, success_response
 
 from accounts.utils import(
-    ADMIN, MANAGER, get_admin_perm, get_manager_perm, is_manager,
+    ADMIN, MANAGER, get_admin_perm, get_manager_perm, is_manager, is_student,
     get_student_perm, is_strong_password)
 from .permissions import IsAdmin, IsManager
 from .serializers import (CreateUserSerializer, LoginSerializer,
@@ -29,6 +29,12 @@ class LoginView(APIView):
             user = User.objects.filter(username=username).first()
             if not user:
                 return error_response(error='Invalid credentials')
+            if not user.is_active:
+                print(user.user_permissions.all())
+                for perm in user.user_permissions.all():
+                    print(perm.codename)
+                print('reached here')
+                return error_response(error="You have been suspended")
             if user.check_password(password):
                 refresh = RefreshToken.for_user(user)
                 tokens = {

@@ -4,4 +4,5 @@ WORKDIR /usr/src/app
 COPY requirements.txt requirements.txt
 RUN pip install pytz
 RUN pip install -r requirements.txt 
-CMD [ "python", "manage.py", "create_admin" ]
+COPY . .
+# CMD [ "python", "manage.py", "create_admin" ]

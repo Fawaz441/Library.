@@ -44,7 +44,7 @@ class SetBookUnavailable(APIView):
             return error_repsonse(error="This book does not exist")
         if book.current_borrower:
             return error_response(error="This book has been borrowed so it cannot be set as unavailable")
-        if book.book_borrow_requests.filter(status="PENDING").count() > 0:
+        if BookBorrowRequest.objects.filter(status="PENDING", book=book).count() > 0:
             return error_response(error="This book has pending borrow requests")
         book.available = False
         book.save()
@@ -124,6 +124,8 @@ class BookBorrowRequestAPIView(APIView):
                 current_borrower=request.user).first()
             if prev_borrowed_book:
                 return error_response(error="You have not returned this book : {}".format(prev_borrowed_book.title))
+            if book.current_borrower:
+                return error_response(error="You cannot borrow this book at the moment")
             BookBorrowRequest.objects.create(
                 book=book,
                 student=request.user,
@@ -132,7 +134,7 @@ class BookBorrowRequestAPIView(APIView):
                 request.user.username))
             return success_response(message="Your request has been submitted successfully")
         else:
-            return error_message(error=data.errors)
+            return error_response(error=data.errors)
 
 
 class PendingBookRequests(APIView):
